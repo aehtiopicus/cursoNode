@@ -3,40 +3,61 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 
+var mongoose = require('mongoose');
+var Leader = require('../models/leadership');
+
+
 var leaderRouter = express.Router();
 leaderRouter.use(bodyParser.json());
 
+var _checkError = function(err){
+		if(err){
+			throw err;
+		}	
+}
+
 leaderRouter.route('/')
-.all(function(req,res,next){	
-	res.writeHead(200,{'Content-Type':'text/plain'});
-	next();
-})
 .get(function(req,res,next){
-	res.end('Will show all our leaders to you!');
+	Leader.find({},function(err,leaders){
+		_checkError(err);
+		res.json(leaders);
+	});
 })
 .post(function(req,res,next){
-	console.log('b');
-	res.end('Will add the leader: '+req.body.name+' with details: '+req.body.description);
+	Leader.create(req.body,function(err,leader){
+		_checkError(err);
+		res.json(leader);
+	});
 })
 .delete(function(req,res,next){
-	res.end('Deleting all leaders');
+	Leader.remove({},function(err,resp){
+		_checkError(err);
+		res.json(resp);
+	});
 })
 ;
 leaderRouter.route('/:leaderId')
-.all(function(req,res,next){
-	
-	res.writeHead(200,{'Content-Type':'text/plain'});
-	next('route');
-})
 .get(function(req,res,next){
-	res.end('Will send details of the dish: '+req.params.leaderId+' to you!');	
+	Leader.findById(req.params.leaderId,function(err,leader){
+		_checkError(err);
+		res.json(leader);
+	});
 })
 .put(function(req,res,next){
-	res.write('Updating the leader: ' + req.params.leaderId + '\n');
-	res.end('Will update the leader: ' + req.body.name + ' with details: ' + req.body.description);
+	Leader.findByIdAndUpdate(req.params.leaderId,{
+		$set : req.body
+	},{
+		new : true
+	},function(err,leader){
+		_checkError(err);
+		res.json(leader);
+	});
 })
 .delete(function(req,res,next){
-	res.end('Deleting leader: '+req.params.leaderId);
+	Leader.findByIdAndRemove(req.params.leaderId,function(err,leader){
+		_checkError(err);
+		res.json(leader);	
+	});
 })
 ;
 
