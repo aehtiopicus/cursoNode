@@ -8,6 +8,8 @@ var _dish = require('../models/dishes');
 var Dishes = _dish.Dishes;
 var Comments = _dish.Comments;
 
+var Verify = require('./verify');
+
 var dishRouter = express.Router();
 dishRouter.use(bodyParser.json());
 
@@ -18,14 +20,14 @@ var _checkError = function(err){
 	
 }
 dishRouter.route('/')
-.get(function(req,res,next){
+.get(Verify.verifyOrdinaryUser,function(req,res,next){
 	Dishes.find({},function(err,dish){
 		_checkError(err);
 		//set response to 200 and Content-Type to application/json
 		res.json(dish);
 	});
 })
-.post(function(req,res,next){
+.post(Verify.verifyOrdinaryUser,Verify.verifyAdmin,function(req,res,next){
 	//bodyParser convers to proper json so body is a dish
 	console.log(req.body);
 	Dishes.create(req.body,function(err,dish){
@@ -36,7 +38,7 @@ dishRouter.route('/')
 	});
 	
 })
-.delete(function(req,res,next){
+.delete(Verify.verifyOrdinaryUser,Verify.verifyAdmin,function(req,res,next){
 	Dishes.remove({},function(err,resp){
 		_checkError(err);
 		res.json(resp);
@@ -45,13 +47,13 @@ dishRouter.route('/')
 
 dishRouter.route('/:dishId')
 
-.get(function(req,res,next){
+.get(Verify.verifyOrdinaryUser,function(req,res,next){
 	Dishes.findById(req.params.dishId,function(err,dish){
 		_checkError(err);
 		res.json(dish);
 	});
 })
-.put(function(req,res,next){
+.put(Verify.verifyOrdinaryUser,Verify.verifyAdmin,function(req,res,next){
 	Dishes.findByIdAndUpdate(req.params.dishId,{
 		$set : req.body
 	},{
@@ -62,7 +64,7 @@ dishRouter.route('/:dishId')
 		res.json(dish);
 	});
 })
-.delete(function(req,res,next){
+.delete(Verify.verifyOrdinaryUser,Verify.verifyAdmin,function(req,res,next){
 	Dishes.findByIdAndRemove(req.params.dishId,function(err,resp){
 		_checkError(err);
 		res.json(resp);		
@@ -71,13 +73,13 @@ dishRouter.route('/:dishId')
 ;
 
 dishRouter.route('/:dishId/comments')
-.get(function(req,res,next){
+.get(Verify.verifyOrdinaryUser,function(req,res,next){
 	Dishes.findById(req.params.dishId,function(err,dish){
 		_checkError(err);
 		res.json(dish.comments);
 	});
 })
-.post(function(req,res,next){
+.post(Verify.verifyOrdinaryUser,Verify.verifyAdmin,function(req,res,next){
 	Dishes.findById(req.params.dishId,function(err,dish){
 		_checkError(err);		
 		dish.comments.push(req.body);
@@ -90,7 +92,7 @@ dishRouter.route('/:dishId/comments')
 		});
 	});		
 })
-.delete(function(req,res,next){
+.delete(Verify.verifyOrdinaryUser,Verify.verifyAdmin,function(req,res,next){
 	Dishes.findById(req.params.dishId,function(err,dish){
 		_checkError(err);
 		for(var i = dish.comments.length -1; i >=0 ;i--){
@@ -107,13 +109,13 @@ dishRouter.route('/:dishId/comments')
 });
 
 dishRouter.route('/:dishId/comments/:commentsId')
-.get(function(req,res,next){
+.get(Verify.verifyOrdinaryUser,function(req,res,next){
 	Dishes.findById(req.params.dishId,function(err,dish){
 		_checkError(err);
 		res.json(dish.comments.id(req.params.commentsId));
 	});
 })
-.put(function(req,res,next){
+.put(Verify.verifyOrdinaryUser,Verify.verifyAdmin,function(req,res,next){
 	Dishes.findById(req.params.dishId,function(err,dish){
 		_checkError(err);
 		
@@ -125,7 +127,7 @@ dishRouter.route('/:dishId/comments/:commentsId')
 		});
 	});
 })
-.delete(function(req,res,next){
+.delete(Verify.verifyOrdinaryUser,Verify.verifyAdmin,function(req,res,next){
 	Dishes.findById(req.params.dishId,function(err,dish){
 		_checkError(err);
 		dish.comments.id(req.params.commentsId).remove();

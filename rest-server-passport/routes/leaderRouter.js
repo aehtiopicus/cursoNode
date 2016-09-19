@@ -5,6 +5,7 @@ var bodyParser = require('body-parser');
 
 var mongoose = require('mongoose');
 var Leader = require('../models/leadership');
+var Verify = require('./verify');
 
 
 var leaderRouter = express.Router();
@@ -17,19 +18,19 @@ var _checkError = function(err){
 }
 
 leaderRouter.route('/')
-.get(function(req,res,next){
+.get(Verify.verifyOrdinaryUser,function(req,res,next){
 	Leader.find({},function(err,leaders){
 		_checkError(err);
 		res.json(leaders);
 	});
 })
-.post(function(req,res,next){
+.post(Verify.verifyOrdinaryUser,Verify.verifyAdmin,function(req,res,next){
 	Leader.create(req.body,function(err,leader){
 		_checkError(err);
 		res.json(leader);
 	});
 })
-.delete(function(req,res,next){
+.delete(Verify.verifyOrdinaryUser,Verify.verifyAdmin,function(req,res,next){
 	Leader.remove({},function(err,resp){
 		_checkError(err);
 		res.json(resp);
@@ -37,13 +38,13 @@ leaderRouter.route('/')
 })
 ;
 leaderRouter.route('/:leaderId')
-.get(function(req,res,next){
+.get(Verify.verifyOrdinaryUser,function(req,res,next){
 	Leader.findById(req.params.leaderId,function(err,leader){
 		_checkError(err);
 		res.json(leader);
 	});
 })
-.put(function(req,res,next){
+.put(Verify.verifyOrdinaryUser,Verify.verifyAdmin,function(req,res,next){
 	Leader.findByIdAndUpdate(req.params.leaderId,{
 		$set : req.body
 	},{
@@ -53,7 +54,7 @@ leaderRouter.route('/:leaderId')
 		res.json(leader);
 	});
 })
-.delete(function(req,res,next){
+.delete(Verify.verifyOrdinaryUser,Verify.verifyAdmin,function(req,res,next){
 	Leader.findByIdAndRemove(req.params.leaderId,function(err,leader){
 		_checkError(err);
 		res.json(leader);	

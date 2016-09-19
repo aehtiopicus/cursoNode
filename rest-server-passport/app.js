@@ -42,17 +42,17 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 //passport config
-var User = require('./models/users');
-app.use(passport.initilize());
+var User = require('./models/user');
+app.use(passport.initialize());
 passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
-passport.deserealizeUser(User.deserializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
-app.use('/users', users);
+app.use(users.getRouterUrl(), users.getRouter());
 
 app.use(leaderRouter.getRouterUrl(), leaderRouter.getRouter());
 app.use(dishRouter.getRouterUrl(), dishRouter.getRouter());

@@ -5,6 +5,7 @@ var bodyParser = require('body-parser');
 
 var mongoose = require('mongoose');
 var Promotion = require('../models/promotions');
+var Verify = require('./verify');
 
 var promoRouter = express.Router();
 promoRouter.use(bodyParser.json());
@@ -16,19 +17,19 @@ var _checkError = function(err){
 };
 
 promoRouter.route('/')
-.get(function(req,res,next){
+.get(Verify.verifyOrdinaryUser,function(req,res,next){
 	Promotion.find({},function(err,promotions){
 		_checkError(err);
 		res.json(promotions);
 	});
 })
-.post(function(req,res,next){
+.post(Verify.verifyOrdinaryUser,Verify.verifyAdmin,function(req,res,next){
 	Promotion.create(req.body,function(err,promotion){
 		_checkError(err);
 		res.json(promotion);
 	});
 })
-.delete(function(req,res,next){
+.delete(Verify.verifyOrdinaryUser,Verify.verifyAdmin,function(req,res,next){
 	Promotion.remove({},function(err,removedPromotions){
 		_checkError(err);
 		res.json(removedPromotions);
@@ -36,14 +37,14 @@ promoRouter.route('/')
 })
 ;
 promoRouter.route('/:promoId')
-.get(function(req,res,next){
+.get(Verify.verifyOrdinaryUser,function(req,res,next){
 	console.log(req.params.promoId);
 	Promotion.findById(req.params.promoId,function(err,promotion){
 		_checkError(err);
 		res.json(promotion);
 	});
 })
-.put(function(req,res,next){
+.put(Verify.verifyOrdinaryUser,Verify.verifyAdmin,function(req,res,next){
 	Promotion.findByIdAndUpdate(req.params.promoId,{
 		$set : req.body
 	},{
@@ -53,7 +54,7 @@ promoRouter.route('/:promoId')
 		res.json(updatedPromotion);
 	});
 })
-.delete(function(req,res,next){
+.delete(Verify.verifyOrdinaryUser,Verify.verifyAdmin,function(req,res,next){
 	Promotion.findByIdAndRemove(req.params.promoId,function(err,deletedPromo){
 		_checkError(err);
 		res.json(deletedPromo);
